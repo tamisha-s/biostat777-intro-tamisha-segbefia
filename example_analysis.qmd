@@ -1,20 +1,29 @@
 ---
 title: "Example Analysis"
+bibliography: references.bib
 ---
 
-This example analysis explores the SEER Breast Cancer Dataset from the National Cancer Institute (NCI).
+This example analysis explores the [SEER Breast Cancer Dataset](https://ieee-dataport.org/open-access/seer-breast-cancer-data) from the National Cancer Institute (NCI). As described in the website, this dataset of breast cancer patients was obtained from the 2017 November update of the SEER Program of the NCI, which provides information on population-based cancer statistics.
 
-The question I aim to answer is: how does the race of the patient affect their status, survival, and other features?
+The question I aim to answer is: what can the race of the patient tell us about the other features?
 
 ::: callout-note
-While I acknowledge that we would need a deeper analysis, such as perhaps a comparison of genomic data (e.g., BRCA 1/2 status), I thought this would be an interesting way to look at how race and status are related in this dataset.
+While I acknowledge that we would need a deeper analysis, such as perhaps a comparison of genomic data (e.g., BRCA 1/2 status), I thought this would be an interesting way to look at how race and other features are related in this dataset.
 :::
 
+This example analysis is intended for people who are starting to work with healthcare data and are interested in seeing how factors such as race affect patient health outcomes.
+
 ### Installing packages and loading libraries
+
+```{r install corrplot}
+#| output: false
+install.packages("ggcorrplot", repos="http://cran.us.r-project.org")
+```
 
 ```{r loading the libraries we will use}
 #| output: false
 library(tidyverse)
+library(ggcorrplot)
 ```
 
 ### Exploring the dataset to be used
@@ -47,7 +56,7 @@ bc <- bc %>%
 #### Data Dictionary
 
 | Variable               | Class  | Description                                                                                                |
-|------------|------------|------------------------------------------------|
+|---------------|---------------|-------------------------------------------|
 | age                    | double | age at diagnosis                                                                                           |
 | race                   | factor | race recode (white, black, other)                                                                          |
 | marital_status         | factor | marital status at diagnosis                                                                                |
@@ -72,11 +81,125 @@ First, I want to see the total number of patients that are either alive or dead 
 
 ```{r see total number alive/dead by race}
 bc_status <- bc %>%
+  mutate(race = recode(race, "Other (American Indian/AK Native, Asian/Pacific Islander)" = "Other (not Black/White)")) %>%
   group_by(race, status) %>%
   summarise(total = n()) %>%
   ggplot(aes(fill=status, y=total, x=race)) +
     geom_bar(position="dodge", stat="identity") +
-    scale_x_discrete(labels=c('Black', 'Other (not Black/White)', 'White'))
+    scale_x_discrete(labels=c('Black', 'Other (not Black/White)', 'White')) +
+    labs(
+      title = "Visualizing status of breast cancer patients in the SEER dataset",
+      subtitle = "Comparison between Black, White, and Other (American Indian, Asian/Pacific Islander)",
+      x = "Race",
+      y = "Number of patients"
+    )
+    
 
 bc_status
 ```
+
+#### Creating a correlation matrix
+
+I want to create a correlation matrix with the numeric values in the dataset (i.e., not classes)
+
+```{r selecting the numeric values}
+bc_mod <- bc %>%
+  select(age, tumor_size, regional_node_examined, regional_node_pos, survival_months)
+```
+
+Now, I will create the correlation matrix
+
+::: callout-note
+Quick refresher on how to interpret a correlation matrix:
+
+-   -1 indicates a perfectly negative linear correlation between two variables
+
+-   0 indicates no linear correlation between two variables
+
+-   1 indicates a perfectly positive linear correlation between two variables
+:::
+
+```{r creating the correlation matrix}
+corr <- round(cor(bc_mod), 1)
+corr
+```
+
+#### Visualizing the correlation matrix
+
+```{r visualize the correlation matrix}
+ggcorrplot(corr, method = "circle")
+```
+
+From the correlation visualization, we see a potential moderate positive correlation between `regional_node_examined` and `regional_node_pos`. However, from the data dictionary, this makes sense because `regional_node_pos` is dependent on `regional_node_examined`.
+
+However, it seems as though there might be negative correlation between the following:
+
+-   `tumor_size` and `age`
+
+-   `tumor_size` and `survival_months`
+
+-   `regional_node_pos` and `survival_months`
+
+Let's explore one of those further.
+
+#### Visualizing `tumor_size` and `survival_months`, grouped by `race`
+
+Now, I want to see if there might be a causal relationship between tumor size and survival months, grouped by race. This relationship was highlighted in [@tanvetyanon_relationship_2010].
+
+```{r tumor size vs survival months}
+g <- bc %>%
+  mutate(race = recode(race, "Other (American Indian/AK Native, Asian/Pacific Islander)" = "Other (not Black/White)")) %>%
+  group_by(race) %>%
+  ggplot(aes(tumor_size, survival_months)) +
+  geom_point() +
+  facet_grid(rows = vars(race)) +
+  labs(
+    title = "Visualizing tumor size vs survival months",
+    subtitle = "Grouped by race to look for differences",
+    x = "Tumor size (in millimeters)",
+    y = "Survival months"
+  )
+
+g
+```
+
+Thought not very noticeable, the graph above shows the slightly negative linear relationship between survival months and tumor size.
+
+### Summary and Conclusion
+
+In conclusion, I started to look at the different features related to female patients with breast cancer. I also began to explore how race could play a part in looking for these differences.
+
+Honestly, I know there is more I could do for this analysis. I intend to extend this project by creating and running a prediction algorithm to see how well I could predict status (alive/dead) based on the different features.
+
+Thanks for reading!
+
+#### Appendix
+
+Below are the different functions I used from each of the packages.
+
+From `dplyr` / `tidyr`:
+
+-   `rename()`
+
+-   `mutate_if()`
+
+-   `group_by`
+
+-   `summarise()`
+
+-   `n()`
+
+-   `select()`
+
+From `ggplot2`:
+
+-   `geom_bar()`
+
+-   `facet_grid()`
+
+-   `geom_point()`
+
+### References
+
+::: {#refs}
+:::

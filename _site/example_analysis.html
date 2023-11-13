@@ -54,7 +54,26 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
@@ -146,6 +165,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#installing-packages-and-loading-libraries" id="toc-installing-packages-and-loading-libraries" class="nav-link active" data-scroll-target="#installing-packages-and-loading-libraries">Installing packages and loading libraries</a></li>
   <li><a href="#exploring-the-dataset-to-be-used" id="toc-exploring-the-dataset-to-be-used" class="nav-link" data-scroll-target="#exploring-the-dataset-to-be-used">Exploring the dataset to be used</a></li>
   <li><a href="#building-our-plotsvisualization" id="toc-building-our-plotsvisualization" class="nav-link" data-scroll-target="#building-our-plotsvisualization">Building our plots/visualization</a></li>
+  <li><a href="#summary-and-conclusion" id="toc-summary-and-conclusion" class="nav-link" data-scroll-target="#summary-and-conclusion">Summary and Conclusion</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul>
 </nav>
     </div>
@@ -169,8 +190,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </header>
 
-<p>This example analysis explores the SEER Breast Cancer Dataset from the National Cancer Institute (NCI).</p>
-<p>The question I aim to answer is: how does the race of the patient affect their status, survival, and other features?</p>
+<p>This example analysis explores the <a href="https://ieee-dataport.org/open-access/seer-breast-cancer-data">SEER Breast Cancer Dataset</a> from the National Cancer Institute (NCI). As described in the website, this dataset of breast cancer patients was obtained from the 2017 November update of the SEER Program of the NCI, which provides information on population-based cancer statistics.</p>
+<p>The question I aim to answer is: what can the race of the patient tell us about the other features?</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -181,47 +202,52 @@ Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>While I acknowledge that we would need a deeper analysis, such as perhaps a comparison of genomic data (e.g., BRCA 1/2 status), I thought this would be an interesting way to look at how race and status are related in this dataset.</p>
+<p>While I acknowledge that we would need a deeper analysis, such as perhaps a comparison of genomic data (e.g., BRCA 1/2 status), I thought this would be an interesting way to look at how race and other features are related in this dataset.</p>
 </div>
 </div>
+<p>This example analysis is intended for people who are starting to work with healthcare data and are interested in seeing how factors such as race affect patient health outcomes.</p>
 <section id="installing-packages-and-loading-libraries" class="level3">
 <h3 class="anchored" data-anchor-id="installing-packages-and-loading-libraries">Installing packages and loading libraries</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"ggcorrplot"</span>, <span class="at">repos=</span><span class="st">"http://cran.us.r-project.org"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggcorrplot)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="exploring-the-dataset-to-be-used" class="level3">
 <h3 class="anchored" data-anchor-id="exploring-the-dataset-to-be-used">Exploring the dataset to be used</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>bc <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/SEER_Breast_Cancer_Dataset.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>bc <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/SEER_Breast_Cancer_Dataset.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>bc <span class="ot">&lt;-</span> bc <span class="sc">%&gt;%</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">age =</span> Age,</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">race =</span> Race,</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">marital_status =</span> <span class="st">"Marital Status"</span>,</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">t_stage =</span> <span class="st">"T Stage"</span>,</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">n_stage =</span> <span class="st">"N Stage"</span>,</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">sixth_stage =</span> <span class="st">"6th Stage"</span>,</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>         <span class="at">grade =</span> <span class="st">"Grade"</span>,</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>         <span class="at">a_stage =</span> <span class="st">"A Stage"</span>,</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>         <span class="at">tumor_size =</span> <span class="st">"Tumor Size"</span>,</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>         <span class="at">estrogen_status =</span> <span class="st">"Estrogen Status"</span>,</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>         <span class="at">progesterone_status =</span> <span class="st">"Progesterone Status"</span>,</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>         <span class="at">regional_node_examined =</span> <span class="st">"Regional Node Examined"</span>,</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>         <span class="at">regional_node_pos =</span> <span class="st">"Reginol Node Positive"</span>,</span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>         <span class="at">survival_months =</span> <span class="st">"Survival Months"</span>,</span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>         <span class="at">status =</span> Status) <span class="sc">%&gt;%</span></span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_if</span>(is.character, as.factor)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>bc <span class="ot">&lt;-</span> bc <span class="sc">%&gt;%</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">age =</span> Age,</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">race =</span> Race,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">marital_status =</span> <span class="st">"Marital Status"</span>,</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">t_stage =</span> <span class="st">"T Stage"</span>,</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">n_stage =</span> <span class="st">"N Stage"</span>,</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">sixth_stage =</span> <span class="st">"6th Stage"</span>,</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>         <span class="at">grade =</span> <span class="st">"Grade"</span>,</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>         <span class="at">a_stage =</span> <span class="st">"A Stage"</span>,</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>         <span class="at">tumor_size =</span> <span class="st">"Tumor Size"</span>,</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>         <span class="at">estrogen_status =</span> <span class="st">"Estrogen Status"</span>,</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>         <span class="at">progesterone_status =</span> <span class="st">"Progesterone Status"</span>,</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>         <span class="at">regional_node_examined =</span> <span class="st">"Regional Node Examined"</span>,</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>         <span class="at">regional_node_pos =</span> <span class="st">"Reginol Node Positive"</span>,</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>         <span class="at">survival_months =</span> <span class="st">"Survival Months"</span>,</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>         <span class="at">status =</span> Status) <span class="sc">%&gt;%</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_if</span>(is.character, as.factor)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <section id="data-dictionary" class="level4">
 <h4 class="anchored" data-anchor-id="data-dictionary">Data Dictionary</h4>
 <table class="table">
 <caption>Data dictionary for the SEER Breast Cancer Dataset</caption>
 <colgroup>
-<col style="width: 16%">
-<col style="width: 16%">
-<col style="width: 66%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 58%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -314,19 +340,145 @@ Note
 <h3 class="anchored" data-anchor-id="building-our-plotsvisualization">Building our plots/visualization</h3>
 <p>First, I want to see the total number of patients that are either alive or dead by race.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>bc_status <span class="ot">&lt;-</span> bc <span class="sc">%&gt;%</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(race, status) <span class="sc">%&gt;%</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">total =</span> <span class="fu">n</span>()) <span class="sc">%&gt;%</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">fill=</span>status, <span class="at">y=</span>total, <span class="at">x=</span>race)) <span class="sc">+</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_bar</span>(<span class="at">position=</span><span class="st">"dodge"</span>, <span class="at">stat=</span><span class="st">"identity"</span>) <span class="sc">+</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_x_discrete</span>(<span class="at">labels=</span><span class="fu">c</span>(<span class="st">'Black'</span>, <span class="st">'Other (not Black/White)'</span>, <span class="st">'White'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>bc_status <span class="ot">&lt;-</span> bc <span class="sc">%&gt;%</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">race =</span> <span class="fu">recode</span>(race, <span class="st">"Other (American Indian/AK Native, Asian/Pacific Islander)"</span> <span class="ot">=</span> <span class="st">"Other (not Black/White)"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(race, status) <span class="sc">%&gt;%</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">total =</span> <span class="fu">n</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">fill=</span>status, <span class="at">y=</span>total, <span class="at">x=</span>race)) <span class="sc">+</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_bar</span>(<span class="at">position=</span><span class="st">"dodge"</span>, <span class="at">stat=</span><span class="st">"identity"</span>) <span class="sc">+</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_x_discrete</span>(<span class="at">labels=</span><span class="fu">c</span>(<span class="st">'Black'</span>, <span class="st">'Other (not Black/White)'</span>, <span class="st">'White'</span>)) <span class="sc">+</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>      <span class="at">title =</span> <span class="st">"Visualizing status of breast cancer patients in the SEER dataset"</span>,</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>      <span class="at">subtitle =</span> <span class="st">"Comparison between Black, White, and Other (American Indian, Asian/Pacific Islander)"</span>,</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>      <span class="at">x =</span> <span class="st">"Race"</span>,</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> <span class="st">"Number of patients"</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>`summarise()` has grouped output by 'race'. You can override using the
 `.groups` argument.</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>bc_status</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>bc_status</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="example_analysis_files/figure-html/see total number alive/dead by race-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<section id="creating-a-correlation-matrix" class="level4">
+<h4 class="anchored" data-anchor-id="creating-a-correlation-matrix">Creating a correlation matrix</h4>
+<p>I want to create a correlation matrix with the numeric values in the dataset (i.e., not classes)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>bc_mod <span class="ot">&lt;-</span> bc <span class="sc">%&gt;%</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(age, tumor_size, regional_node_examined, regional_node_pos, survival_months)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now, I will create the correlation matrix</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Quick refresher on how to interpret a correlation matrix:</p>
+<ul>
+<li><p>-1 indicates a perfectly negative linear correlation between two variables</p></li>
+<li><p>0 indicates no linear correlation between two variables</p></li>
+<li><p>1 indicates a perfectly positive linear correlation between two variables</p></li>
+</ul>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>corr <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="fu">cor</span>(bc_mod), <span class="dv">1</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>corr</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                        age tumor_size regional_node_examined regional_node_pos
+age                     1.0       -0.1                    0.0               0.0
+tumor_size             -0.1        1.0                    0.1               0.2
+regional_node_examined  0.0        0.1                    1.0               0.4
+regional_node_pos       0.0        0.2                    0.4               1.0
+survival_months         0.0       -0.1                    0.0              -0.1
+                       survival_months
+age                                0.0
+tumor_size                        -0.1
+regional_node_examined             0.0
+regional_node_pos                 -0.1
+survival_months                    1.0</code></pre>
+</div>
+</div>
+</section>
+<section id="visualizing-the-correlation-matrix" class="level4">
+<h4 class="anchored" data-anchor-id="visualizing-the-correlation-matrix">Visualizing the correlation matrix</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggcorrplot</span>(corr, <span class="at">method =</span> <span class="st">"circle"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="example_analysis_files/figure-html/visualize the correlation matrix-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>From the correlation visualization, we see a potential moderate positive correlation between <code>regional_node_examined</code> and <code>regional_node_pos</code>. However, from the data dictionary, this makes sense because <code>regional_node_pos</code> is dependent on <code>regional_node_examined</code>.</p>
+<p>However, it seems as though there might be negative correlation between the following:</p>
+<ul>
+<li><p><code>tumor_size</code> and <code>age</code></p></li>
+<li><p><code>tumor_size</code> and <code>survival_months</code></p></li>
+<li><p><code>regional_node_pos</code> and <code>survival_months</code></p></li>
+</ul>
+<p>Let’s explore one of those further.</p>
+</section>
+<section id="visualizing-tumor_size-and-survival_months-grouped-by-race" class="level4">
+<h4 class="anchored" data-anchor-id="visualizing-tumor_size-and-survival_months-grouped-by-race">Visualizing <code>tumor_size</code> and <code>survival_months</code>, grouped by <code>race</code></h4>
+<p>Now, I want to see if there might be a causal relationship between tumor size and survival months, grouped by race. This relationship was highlighted in <span class="citation" data-cites="tanvetyanon_relationship_2010">(<a href="#ref-tanvetyanon_relationship_2010" role="doc-biblioref">Tanvetyanon et al. 2010</a>)</span>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>g <span class="ot">&lt;-</span> bc <span class="sc">%&gt;%</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">race =</span> <span class="fu">recode</span>(race, <span class="st">"Other (American Indian/AK Native, Asian/Pacific Islander)"</span> <span class="ot">=</span> <span class="st">"Other (not Black/White)"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(race) <span class="sc">%&gt;%</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(tumor_size, survival_months)) <span class="sc">+</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(<span class="at">rows =</span> <span class="fu">vars</span>(race)) <span class="sc">+</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Visualizing tumor size vs survival months"</span>,</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Grouped by race to look for differences"</span>,</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Tumor size (in millimeters)"</span>,</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Survival months"</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>g</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="example_analysis_files/figure-html/tumor size vs survival months-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Thought not very noticeable, the graph above shows the slightly negative linear relationship between survival months and tumor size.</p>
+</section>
+</section>
+<section id="summary-and-conclusion" class="level3">
+<h3 class="anchored" data-anchor-id="summary-and-conclusion">Summary and Conclusion</h3>
+<p>In conclusion, I started to look at the different features related to female patients with breast cancer. I also began to explore how race could play a part in looking for these differences.</p>
+<p>Honestly, I know there is more I could do for this analysis. I intend to extend this project by creating and running a prediction algorithm to see how well I could predict status (alive/dead) based on the different features.</p>
+<p>Thanks for reading!</p>
+<section id="appendix" class="level4">
+<h4 class="anchored" data-anchor-id="appendix">Appendix</h4>
+<p>Below are the different functions I used from each of the packages.</p>
+<p>From <code>dplyr</code> / <code>tidyr</code>:</p>
+<ul>
+<li><p><code>rename()</code></p></li>
+<li><p><code>mutate_if()</code></p></li>
+<li><p><code>group_by</code></p></li>
+<li><p><code>summarise()</code></p></li>
+<li><p><code>n()</code></p></li>
+<li><p><code>select()</code></p></li>
+</ul>
+<p>From <code>ggplot2</code>:</p>
+<ul>
+<li><p><code>geom_bar()</code></p></li>
+<li><p><code>facet_grid()</code></p></li>
+<li><p><code>geom_point()</code></p></li>
+</ul>
+</section>
+</section>
+<section id="references" class="level3">
+<h3 class="anchored" data-anchor-id="references">References</h3>
+<div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-tanvetyanon_relationship_2010" class="csl-entry" role="listitem">
+Tanvetyanon, Tawee, Lary Robinson, K. Eric Sommers, Eric Haura, Jongphil Kim, Soner Altiok, and Gerold Bepler. 2010. <span>“Relationship Between <span>Tumor</span> <span>Size</span> and <span>Survival</span> Among <span>Patients</span> with <span>Resection</span> of <span>Multiple</span> <span>Synchronous</span> <span>Lung</span> <span>Cancers</span>.”</span> <em>Journal of Thoracic Oncology</em> 5 (7): 1018–24. <a href="https://doi.org/10.1097/JTO.0b013e3181dd0fb0">https://doi.org/10.1097/JTO.0b013e3181dd0fb0</a>.
 </div>
 </div>
 
