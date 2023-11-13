@@ -2,8 +2,18 @@
 title: "About"
 ---
 
-About this site
+## Biomedical engineering master's student with a focus in computational medicine
 
-```{r}
-1 + 1
-```
+I am a bioinformatician-in-training with interests in cancer biology, precision medicine, and improving patient healthcare outcomes through data.
+
+## Educational training
+I received my BSc. in Computer Engineering from [Ashesi University](https://www.ashesi.edu.gh/) in Ghana. My capstone project under the supervision of [Prof. Siby Samuel](https://uwaterloo.ca/systems-design-engineering/profile/s5samuel) was in designing low-cost wearable obstacle-detection technology for the visually-impaired.
+
+## Research Experience
+In 2020, I had the opportunity to lead a team of students in the 2020 iGEM competition, where we created the [proof of concept](https://2020.igem.org/Team:AshesiGhana) for the design of a living sea defense system (bio-concrete tetrapod). Our team, named [The Coastbusters](https://2020.igem.org/Team:AshesiGhana/Poster), won a silver medal at the iGEM Giant Jamboree and a $5.5K grant from [Revive and Restore](https://reviverestore.org/events/igem-2020/).
+
+If you're interested, you can watch our videos below:
+
+* [Promotional video](https://video.igem.org/w/4e1c8b4a-a4ee-499a-9be5-ccbf4694967c)
+
+* [Longer form explanation video](https://video.igem.org/w/8ddf129b-1df3-4612-85c7-0c643c4a52dd)
