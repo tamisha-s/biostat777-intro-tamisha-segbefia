@@ -1,11 +1,9 @@
 ---
-title: "tamisha_io"
+title: "Tamisha Dzifa Segbefia"
 ---
 
-This is a Quarto website.
+👋🏾 Hello, and welcome to my website.
 
-To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
+I'm Tamisha, currently a second year biomedical engineering student at Johns Hopkins University. I am a bioinformatician-in-training passionate about data science, social change, and improving patient healthcare outcomes. When I'm not learning or doing research, I love to read, practice hand lettering, and travel the world.
 
-```{r}
-1 + 1
-```
+![Me at Golden Gate Bridge, SF](Tamisha_SF.jpeg){width="300"}
