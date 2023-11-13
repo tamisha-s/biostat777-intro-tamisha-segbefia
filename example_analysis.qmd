@@ -1,0 +1,82 @@
+---
+title: "Example Analysis"
+---
+
+This example analysis explores the SEER Breast Cancer Dataset from the National Cancer Institute (NCI).
+
+The question I aim to answer is: how does the race of the patient affect their status, survival, and other features?
+
+::: callout-note
+While I acknowledge that we would need a deeper analysis, such as perhaps a comparison of genomic data (e.g., BRCA 1/2 status), I thought this would be an interesting way to look at how race and status are related in this dataset.
+:::
+
+### Installing packages and loading libraries
+
+```{r loading the libraries we will use}
+#| output: false
+library(tidyverse)
+```
+
+### Exploring the dataset to be used
+
+```{r reading in the data}
+#| output: false
+bc <- read_csv("data/SEER_Breast_Cancer_Dataset.csv")
+```
+
+```{r making the data a tibble and renaming columns}
+bc <- bc %>%
+  rename(age = Age,
+         race = Race,
+         marital_status = "Marital Status",
+         t_stage = "T Stage",
+         n_stage = "N Stage",
+         sixth_stage = "6th Stage",
+         grade = "Grade",
+         a_stage = "A Stage",
+         tumor_size = "Tumor Size",
+         estrogen_status = "Estrogen Status",
+         progesterone_status = "Progesterone Status",
+         regional_node_examined = "Regional Node Examined",
+         regional_node_pos = "Reginol Node Positive",
+         survival_months = "Survival Months",
+         status = Status) %>%
+  mutate_if(is.character, as.factor)
+```
+
+#### Data Dictionary
+
+| Variable               | Class  | Description                                                                                                |
+|------------|------------|------------------------------------------------|
+| age                    | double | age at diagnosis                                                                                           |
+| race                   | factor | race recode (white, black, other)                                                                          |
+| marital_status         | factor | marital status at diagnosis                                                                                |
+| t_stage                | factor | Breast Adjusted AJCC 6th T (1988+)                                                                         |
+| n_stage                | factor | Breast Adjusted AJCC 6th N (1988+)                                                                         |
+| sixth_stage            | factor | Breast Adjusted AJCC 6th Stage (1988+)                                                                     |
+| grade                  | factor | grade as defined in ICD-O-2; 1992                                                                          |
+| a_stage                | factor | SEER historic stage A                                                                                      |
+| tumor_size             | double | CS tumor size (2004+)                                                                                      |
+| estrogen_status        | factor | ER Status Recode Breast Cancer (1990+)                                                                     |
+| progesterone_status    | factor | PR Status Recode Breast Cancer (1990+)                                                                     |
+| regional_node_examined | double | total number of regional lymph nodes that were removed and examined by the pathologist                     |
+| regional_node_pos      | double | the exact number of regional lymph nodes examined by the pathologist that were found to contain metastases |
+| survival_months        | double | survival months                                                                                            |
+| status                 | factor | vital status recode (1 = alive, 2 = dead)                                                                  |
+
+: Data dictionary for the SEER Breast Cancer Dataset
+
+### Building our plots/visualization
+
+First, I want to see the total number of patients that are either alive or dead by race.
+
+```{r see total number alive/dead by race}
+bc_status <- bc %>%
+  group_by(race, status) %>%
+  summarise(total = n()) %>%
+  ggplot(aes(fill=status, y=total, x=race)) +
+    geom_bar(position="dodge", stat="identity") +
+    scale_x_discrete(labels=c('Black', 'Other (not Black/White)', 'White'))
+
+bc_status
+```
